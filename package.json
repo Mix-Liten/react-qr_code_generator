@@ -1,12 +1,13 @@
 {
-  "name": "react-qr-code-generator",
+  "name": "react-qr_code_generator",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.0.1",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "deploy": "deploy.sh"
   },
   "dependencies": {
     "react": "^18.2.0",

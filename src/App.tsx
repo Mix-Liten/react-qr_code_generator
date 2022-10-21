@@ -1,4 +1,6 @@
-import { FormEvent, useState, useRef } from 'react'
+import { FormEvent, useState } from 'react'
+import QRCode from 'qrcode'
+
 import Header from './components/Header'
 import InputField from './components/InputField'
 import Loading from './components/Loading'
@@ -21,15 +23,12 @@ const isUrl = (str: string) => {
   }
 }
 
-declare var QRCode: any
-
 function App() {
   const [url, setUrl] = useState('')
   const [size, setSize] = useState(sizeOptions[0].value)
   const [isError, setIsError] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
-  const qrcodeRef = useRef<HTMLDivElement>(null)
-  const qrcodeLink = useRef<string | undefined>('')
+  const [qrCode, setQrCode] = useState('')
 
   function onChangeUrl(str: string) {
     if (isError) setIsError(false)
@@ -45,30 +44,30 @@ function App() {
     }
 
     setIsLoading(true)
-    clearUI()
     generateQRCode(url, parseInt(size))
 
     setTimeout(() => {
       setIsLoading(false)
-      qrcodeLink.current = qrcodeRef.current?.querySelector('img')?.src
     }, 1e3)
   }
 
   function generateQRCode(url: string, size: number) {
-    const qrcode = new QRCode('qrcode', {
-      text: url,
-      width: size,
-      height: size,
-    })
-  }
+    QRCode.toDataURL(
+      url,
+      {
+        width: size,
+        margin: 1,
+        color: {
+          dark: '#1f2937',
+          light: '#eeeeee',
+        },
+      },
+      (err, url) => {
+        if (err) return console.error(err)
 
-  const clearUI = () => {
-    if (qrcodeRef.current) {
-      qrcodeRef.current.innerHTML = ''
-    }
-    if (qrcodeLink.current) {
-      qrcodeLink.current = ''
-    }
+        setQrCode(url)
+      }
+    )
   }
 
   return (
@@ -87,7 +86,7 @@ function App() {
                 <SelectField name="size" options={sizeOptions} onChange={s => setSize(s)} />
               </div>
 
-              <button className="bg-gray-600 rounded w-full text-white py-3 px-4 mt-5 hover:bg-black" type="submit">
+              <button type="submit" className="bg-gray-600 rounded w-full text-white py-3 px-4 mt-5 hover:bg-gray-800">
                 Generate QR Code
               </button>
             </form>
@@ -97,21 +96,24 @@ function App() {
           </div>
         </div>
 
-        <div id="generated" className="max-w-5xl m-auto flex flex-col text-center align-center justify-center mt-5">
+        <div
+          id="generated"
+          className="max-w-5xl m-auto flex flex-col text-center align-center justify-center my-5 px-10"
+        >
           {isLoading && <Loading />}
 
-          <div id="qrcode" className={`m-auto ${isLoading ? 'hidden' : ''}`} ref={qrcodeRef}></div>
-          {qrcodeLink.current && (
-            <a
-              id="save-link"
-              href={qrcodeLink.current}
-              className={`bg-red-500 hover:bg-red-700 text-white font-bold py-2 rounded w-1/3 m-auto my-5 ${
-                isLoading ? 'hidden' : ''
-              }`}
-              download="qrcode"
-            >
-              Save Image
-            </a>
+          {!isLoading && qrCode && (
+            <>
+              <img src={qrCode} className="m-auto" alt="qrcode.png" />
+              <a
+                id="save-link"
+                className={'bg-red-500 hover:bg-red-700 text-white font-bold py-2 rounded w-1/2 md:w-1/3 m-auto my-5'}
+                href={qrCode}
+                download="qrcode"
+              >
+                Save Image
+              </a>
+            </>
           )}
         </div>
       </main>

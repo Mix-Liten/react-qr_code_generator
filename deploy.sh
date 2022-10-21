@@ -12,10 +12,14 @@ cd dist
 # if you are deploying to a custom domain
 # echo 'www.example.com' > CNAME
 
+timestamp=$(date +"%Y-%m-%d_%T")
+message='deploy_'
+message+=${timestamp}
+
 git init
 git checkout -B main
 git add -A
-git commit -m 'deploy'
+git commit -m $message
 
 # if you are deploying to https://<USERNAME>.github.io/<REPO>
 git push -f git@github.com:mix-liten/react-qr_code_generator.git main:gh-pages
